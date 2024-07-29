@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria de Cachorros</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        main {
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+        #botoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .imagens {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .imagens img {
+            max-width: 250px;
+            max-height: 180px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .imagens img:hover {
+            transform: scale(1.05);
+        }
+        .loading {
+            text-align: center;
+            font-size: 1.2em;
+            color: #007bff;
+        }
+        @media (max-width: 768px) {
+            button {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            .imagens img {
+                max-width: 200px;
+                max-height: 150px;
+            }
+        }
+        @media (max-width: 480px) {
+            main {
+                padding: 10px;
+            }
+            button {
+                width: 100%;
+                padding: 15px;
+                font-size: 16px;
+            }
+            .imagens img {
+                max-width: 150px;
+                max-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="botoes">
+            <ul id="lista-botoes"></ul>
+        </div>
+        <div class="imagens" id="imagens"></div>
+        <div class="loading" id="loading"></div>
+    </main>
+    <script>
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url)
+                if (!response.ok) throw new Error('Não foi possível obter os dados')
+                return await response.json()
+            } catch (error) {
+                console.error(error)
+                return null
+            }
+        }
+
+        async function carregarRacas() {
+            const listaRacasUrl = 'https://dog.ceo/api/breeds/list/all'
+            const data = await fetchData(listaRacasUrl)
+            if (data) {
+                const listaBotoes = document.getElementById('lista-botoes')
+                const racas = Object.keys(data.message)
+                racas.forEach(raca => criarBotao(raca))
+            }
+        }
+
+        function criarBotao(raca) {
+            const listaBotoes = document.getElementById('lista-botoes')
+            const botao = document.createElement('button')
+            botao.textContent = raca.charAt(0).toUpperCase() + raca.slice(1)
+            botao.addEventListener('click', () => mostrarImagens(raca))
+            listaBotoes.appendChild(botao)
+        }
+
+        async function mostrarImagens(raca) {
+            const imagensDiv = document.getElementById('imagens')
+            imagensDiv.innerHTML = ''
+            document.getElementById('loading').textContent = 'Carregando imagens...'
+
+            const imagensUrl = `https://dog.ceo/api/breed/${raca}/images/random/4`
+            const data = await fetchData(imagensUrl)
+            document.getElementById('loading').textContent = ''
+
+            if (data) {
+                const imagens = data.message
+                imagens.forEach(url => criarImagem(url))
+            }
+        }
+
+        function criarImagem(url) {
+            const img = document.createElement('img')
+            img.src = url
+            document.getElementById('imagens').appendChild(img)
+        }
+
+        carregarRacas()
+    </script>
+</body>
+</html>
